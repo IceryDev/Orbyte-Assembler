@@ -12,11 +12,11 @@ public enum Instruction {
     CMP((byte)0b00, (byte)0b1000, 2, false, true),
     LCP((byte)0b00, (byte)0b1001, 2, false, true), //Logical ComPare, ARM equivalent - TST
 
-
     LSL((byte)0b01, (byte)0b0000, 2, true, true),
     LSR((byte)0b01, (byte)0b0001, 2, true, true),
     ASR((byte)0b01, (byte)0b0010, 2, true, true),
     ROT((byte)0b01, (byte)0b0011, 2, true, true),
+
     STR((byte)0b10, (byte)0b0000, 2, false, false),
     PUL((byte)0b10, (byte)0b0001, 2, false, true), //PULl, ARM equivalent - LDR
 
@@ -64,5 +64,9 @@ public enum Instruction {
 
     public boolean getHasFlagBit(){
         return this.hasFlagBit;
+    }
+
+    public boolean isImmediateAllowed() {
+        return immediateAllowed;
     }
 }

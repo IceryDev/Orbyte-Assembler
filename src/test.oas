@@ -1,8 +1,6 @@
 
-Sum: //aaaaa
-CMP R0, R1 //ASASDF
-LSR R1, R2
-LOR R3 R3 R6 //This is a comment
-SUM R2 R4 PC
-DIF r3 u7 r4
+Sum:
+    LOR R3 R3 #1
+    SUMS R2 R4 PC
+    DIFS r3 r7 r4
 

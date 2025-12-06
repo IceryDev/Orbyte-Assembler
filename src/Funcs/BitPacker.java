@@ -2,20 +2,23 @@ package Funcs;
 
 // Access packedBits if the method returns true, to store the packed bits
 public class BitPacker {
+    public final int packSize = 8;
     public byte packedBits = 0;
     public byte bitBuffer = 0;
     public int bitCount = 0;
 
-    // Returns true if the buffer is full and ready to be written to a file.
+    // Appends the input bits to the input buffer from the right.
+    // When the buffer is full, writes the byte-long bits to the variable packedBits.
+    // Returns true if the buffer got full and ready to be written to a file.
     public boolean appendBits(byte bitsToLoad, int numberOfBits){
-        if (bitCount + numberOfBits < 8){
+        if (bitCount + numberOfBits < packSize){
             bitBuffer <<= numberOfBits;
             bitBuffer |= bitsToLoad;
             bitCount += numberOfBits;
             return false;
         }
         else{
-            int includedBitCount = (8 - bitCount);
+            int includedBitCount = (packSize - bitCount);
             byte tempBits = (byte)(bitsToLoad >> (numberOfBits - includedBitCount));
             bitBuffer <<= includedBitCount;
             bitBuffer |= tempBits;
@@ -26,6 +29,5 @@ public class BitPacker {
             bitCount = numberOfBits - includedBitCount;
             return true;
         }
-
     }
 }
