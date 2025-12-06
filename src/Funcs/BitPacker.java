@@ -1,5 +1,6 @@
 package Funcs;
 
+// Access packedBits if the method returns true, to store the packed bits
 public class BitPacker {
     public byte packedBits = 0;
     public byte bitBuffer = 0;

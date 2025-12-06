@@ -2,5 +2,7 @@
 Sum: //aaaaa
 CMP R0, R1 //ASASDF
 LSR R1, R2
-LOR R3, R3
-DIF
+LOR R3 R3 R6 //This is a comment
+SUM R2 R4 PC
+DIF r3 u7 r4
+

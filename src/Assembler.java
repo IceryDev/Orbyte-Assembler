@@ -27,10 +27,11 @@ public class Assembler {
 
             //Read each line
             int lineNo = 1;
+            int instructionNo = 0;
             String line;
             while ((line = fileReader.readLine()) != null){
 
-                if (line.isEmpty()) { lineNo++; continue; }
+                if (line.isEmpty() || line.startsWith("//")) { lineNo++; continue; }
                 String[] tokens = line.split(" +");
                 boolean flagsSet = tokens[0].toUpperCase().endsWith("S");
                 //Check if label
@@ -45,6 +46,7 @@ public class Assembler {
                     Instruction currentInstruction = Instruction.valueOf(
                                     ((flagsSet) ? tokens[0].substring(0, tokens[0].length() - 1) : tokens[0]).toUpperCase());
 
+                    instructionNo++;
                     if(tokens.length < (currentInstruction.getOpCount() + 1)){
                         System.err.printf("Syntax Error: Invalid number of operands at line %d, required %d but provided %d", lineNo,
                                         (currentInstruction.getOpCount() + 1), tokens.length);
@@ -58,8 +60,35 @@ public class Assembler {
 
                     switch (currentInstruction.getOpCount()){
                         case 1: //Branch instruction
+                            break;
                         case 2: //Shifts or Memory or Comparison
+                            break;
                         case 3: //Operations
+                            if (packer.bitBuffer == 0){
+                                packer.appendBits(currentInstruction.getOpType(), Instruction.OPTYPE_BIT_COUNT);
+                                packer.appendBits(currentInstruction.getOpcode(), Instruction.OPCODE_BIT_COUNT);
+                                if (!currentInstruction.getHasFlagBit() && flagsSet) {
+                                    System.err.printf("Syntax Error: Operation %s cannot have a flag setter bit \"S\"",
+                                                                                                currentInstruction.name());
+                                    return;
+                                } //None of the 3-operand instructions prohibit the S bit but I am keeping this for safety.
+                                packer.appendBits((byte) ((flagsSet) ? 0b1 : 0b0), Instruction.FLAG_BIT_COUNT);
+                            }
+
+                            for (int index = 1; (index < currentInstruction.getOpCount()); index++){
+                                if (!Register.isRegister(tokens[index])){
+                                    System.err.printf("Syntax Error: Invalid operand \"%s\" at line %d. Operands other than"+
+                                            " the last operand must be a register mnemonic (i.e. R0 or R1)", tokens[index], lineNo);
+                                    return;
+                                }
+
+                                if(packer.appendBits(Register.valueOf(tokens[index].toUpperCase()).getRegCode(),
+                                                                                    Register.REGCODE_BIT_COUNT)){
+                                    fileWriter.writeByte(packer.packedBits);
+                                }
+                            }
+
+
                         default:
                             break;
 
@@ -99,5 +128,7 @@ public class Assembler {
         }
 
     }
+
+
 
 }

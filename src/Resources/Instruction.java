@@ -22,7 +22,9 @@ public enum Instruction {
 
     B((byte)0b11, (byte)0b0000, 1, false, false);
 
-
+    public static final int OPTYPE_BIT_COUNT = 2;
+    public static final int OPCODE_BIT_COUNT = 4;
+    public static final int FLAG_BIT_COUNT = 1;
 
     byte opType = 0b0;
     byte opcode = 0b0;
@@ -58,5 +60,9 @@ public enum Instruction {
 
     public int getOpCount(){
         return this.operandCount;
+    }
+
+    public boolean getHasFlagBit(){
+        return this.hasFlagBit;
     }
 }

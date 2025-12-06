@@ -12,6 +12,8 @@ public enum Register { //In the case of expanding instruction size (in bits) you
     R7((byte) 0b111),
     PC((byte) 0b111); //Same as R7
 
+    public static final int REGCODE_BIT_COUNT = 3;
+
     byte regCode = 0b0;
 
     Register (byte regCode){
@@ -26,5 +28,9 @@ public enum Register { //In the case of expanding instruction size (in bits) you
         catch (IllegalArgumentException error){
             return false;
         }
+    }
+
+    public byte getRegCode(){
+        return this.regCode;
     }
 }
