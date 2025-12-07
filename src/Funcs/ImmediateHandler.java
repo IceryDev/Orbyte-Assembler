@@ -16,8 +16,8 @@ public class ImmediateHandler {
     }
 
     //Takes an immediate operand and turns it into an integer.
-    //Returns -1 if a negative value cannot be represented with the specified number of bits.
-    public int parseImmediateToInt(String lastOperand, int immediateMaxBits, boolean negativeAllowed){
+    //If no prefix exists the NumberFormatException must be handled.
+    public int parseImmediateToInt(String lastOperand){
         String immediateString = lastOperand.substring(1, Math.min(PREFIX_END_INDEX, lastOperand.length()));
         int immediateValue;
 
@@ -30,7 +30,12 @@ public class ImmediateHandler {
                             Integer.parseInt(lastOperand.substring(PREFIX_END_INDEX), 16);
             default -> immediateValue = Integer.parseInt(lastOperand.substring(DELIMITER_END_INDEX));
         }
-        if (immediateValue >= Math.pow(2, immediateMaxBits) || (!negativeAllowed && (immediateValue < 0))) { return -1; }
-        return shortenNegative(immediateValue, immediateMaxBits);
+
+        return immediateValue;
+    }
+
+    public boolean isInRange(int immediateValue, int immediateMaxBits, boolean negativeAllowed){
+        if (immediateValue >= Math.pow(2, immediateMaxBits) || (!negativeAllowed && (immediateValue < 0))) { return false; }
+        else return immediateValue >= 0 || (Math.pow(2, immediateMaxBits - 1) >= (-immediateValue));
     }
 }

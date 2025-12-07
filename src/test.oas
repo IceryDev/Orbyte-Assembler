@@ -1,6 +1,13 @@
 
-Sum:
+Start:
     LOR R3 R3 #1
-    SUMS R2 R4 PC
+    LOR R3 R3 R4
+    SUM R2 R4 PC
     DIFS r3 r7 r4
+
+    FRM R4 R3
+    FRM R4 &R3
+
+
+
 

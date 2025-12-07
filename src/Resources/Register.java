@@ -13,6 +13,7 @@ public enum Register { //In the case of expanding instruction size (in bits) you
     PC((byte) 0b111); //Same as R7
 
     public static final int REGCODE_BIT_COUNT = 3;
+    public static final int REGISTER_SIZE = 8;
 
     byte regCode = 0b0;
 
