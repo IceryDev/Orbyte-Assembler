@@ -88,8 +88,7 @@ public class Assembler {
                     switch (operandCount){
                         case 1: //Branch instruction
                             break;
-                        case 2: //Shifts or Memory or Comparison
-
+                        case 2: //Memory or Comparison
                             if (currentInstruction.getOpType() == (byte) 0b10){ //Memory
 
                                 int immediateValue = 0;
@@ -108,14 +107,15 @@ public class Assembler {
                                     return;
                                 }
 
-                                if (!Register.isRegister(tokens[1])){
+                                if (!Register.isRegister(tokens[1].toUpperCase())){
                                     System.err.printf("Syntax Error: Invalid operand \"%s\" at line %d. Operands other than"+
                                                     " the last operand must be a register mnemonic (i.e. R0 or R1)\n",
                                             tokens[1], lineNo);
                                     return;
                                 }
 
-                                if(packer.appendBits(Register.valueOf(tokens[1]).getRegCode(), Register.REGCODE_BIT_COUNT)){
+                                if(packer.appendBits(Register.valueOf(tokens[1].toUpperCase()).getRegCode(),
+                                                                                Register.REGCODE_BIT_COUNT)){
                                     fileWriter.writeByte(packer.packedBits);
                                 }
 
@@ -155,7 +155,7 @@ public class Assembler {
                                     }
 
                                     if(packer.appendBits(Register.valueOf(
-                                            tokens[operandCount].substring((isAddress) ? 1 : 0)).getRegCode(),
+                                            tokens[operandCount].substring((isAddress) ? 1 : 0).toUpperCase()).getRegCode(),
                                                                             Register.REGCODE_BIT_COUNT)){
                                         fileWriter.writeByte(packer.packedBits);
                                     }
@@ -165,17 +165,59 @@ public class Assembler {
                                         fileWriter.writeByte(packer.packedBits);
                                     }
                                 }
-
-
-
                             }
-                            /*else{
+                            else{
+                                packer.appendBits((byte) ((flagsSet) ? 0b1 : 0b0), Instruction.FLAG_BIT_COUNT);
+                                packer.appendBits((byte) ((containsImmediate) ? 0b1 : 0b0), Instruction.IMM_FLAG_BIT_COUNT);
 
-                            }*/
+                                for (int operand = 1; (operand < ((containsImmediate) ? operandCount : operandCount + 1)); operand++){
+                                    if (!Register.isRegister(tokens[operand])){
+                                        System.err.printf("Syntax Error: Invalid operand \"%s\" at line %d. Operands other than"+
+                                                        " the last operand must be a register mnemonic (i.e. R0 or R1)",
+                                                tokens[operand], lineNo);
+                                        return;
+                                    }
 
+                                    if(packer.appendBits(Register.valueOf(tokens[operand].toUpperCase()).getRegCode(),
+                                            Register.REGCODE_BIT_COUNT)){
+                                        fileWriter.writeByte(packer.packedBits);
+                                    }
+                                }
+
+                                if (containsImmediate) {
+                                    try{
+                                        int immediateValue =
+                                                immediateHandler.parseImmediateToInt(tokens[operandCount]);
+
+                                        if (!immediateHandler.isInRange(immediateValue,
+                                                EXTENDED_IMM_MAX_BIT_COUNT, false)){
+                                            System.err.printf("Value Error: Immediate value size at line %d cannot be"+
+                                                            " larger than %d bits nor can be negative\n",
+                                                    lineNo, EXTENDED_IMM_MAX_BIT_COUNT);
+                                            return;
+                                        }
+
+                                        if(packer.appendBits((byte) immediateHandler.shortenNegative(immediateValue,
+                                                EXTENDED_IMM_MAX_BIT_COUNT), EXTENDED_IMM_MAX_BIT_COUNT)){
+                                            fileWriter.writeByte(packer.packedBits);
+                                        }
+
+                                    } catch (NumberFormatException error) {
+                                        System.err.printf("Syntax Error: The immediate operand at line %d must be"+
+                                                " either binary, decimal, or hexadecimal\n", lineNo);
+                                        return;
+                                    }
+                                }
+                                else{
+                                    if(packer.appendBits((byte) 0b0, packer.packSize - packer.bitCount)){
+                                        fileWriter.writeByte(packer.packedBits);
+                                    }
+                                }
+                            }
 
                             break;
                         case 3: //Operations
+
                             packer.appendBits((byte) ((flagsSet) ? 0b1 : 0b0), Instruction.FLAG_BIT_COUNT);
                             packer.appendBits((byte) ((containsImmediate) ? 0b1 : 0b0), Instruction.IMM_FLAG_BIT_COUNT);
 

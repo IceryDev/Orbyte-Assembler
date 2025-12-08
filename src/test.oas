@@ -1,12 +1,9 @@
 
 Start:
-    LOR R3 R3 #1
-    LOR R3 R3 R4
-    SUM R2 R4 PC
-    DIFS r3 r7 r4
-
-    FRM R4 R3
-    FRM R4 &R3
+    LSL R0 R0 #4
+    CMP R0 #3
+    MOVS R0 #63
+    LCP R5 R3
 
 
 

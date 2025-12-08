@@ -12,15 +12,23 @@ public enum Instruction {
 
     CMP((byte)0b01, (byte)0b000, 2, false, true),
     LCP((byte)0b01, (byte)0b001, 2, false, true), //Logical ComPare, ARM equivalent - TST
-    LSL((byte)0b01, (byte)0b010, 2, true, true),
-    LSR((byte)0b01, (byte)0b011, 2, true, true),
-    ASR((byte)0b01, (byte)0b100, 2, true, true),
-    ROT((byte)0b01, (byte)0b101, 2, true, true),
+    LSL((byte)0b01, (byte)0b010, 3, true, true),
+    LSR((byte)0b01, (byte)0b011, 3, true, true),
+    ASR((byte)0b01, (byte)0b100, 3, true, true),
+    ROT((byte)0b01, (byte)0b101, 3, true, true), //ARM equivalent - ROR
 
     WRM((byte)0b10, (byte)0b110, 2, true, false), //WRite to Memory, ARM equivalent - STR
     FRM((byte)0b10, (byte)0b111, 2, true, true), //FRom Memory, ARM equivalent - LDR
 
-    B((byte)0b11, (byte)0b000, 1, false, false);
+    B((byte)0b11, (byte)0b000, 1, false, false),
+    BCS((byte)0b11, (byte)0b001, 1, false, false),
+    BEQ((byte)0b11, (byte)0b010, 1, false, false),
+    BNE((byte)0b11, (byte)0b011, 1, false, false),
+    BHU((byte)0b11, (byte)0b100, 1, false, false),
+    BHS((byte)0b11, (byte)0b101, 1, false, false),
+    BLU((byte)0b11, (byte)0b110, 1, false, false),
+    BLS((byte)0b11, (byte)0b111, 1, false, false);
+
 
     public static final int OPTYPE_BIT_COUNT = 2;
     public static final int OPCODE_BIT_COUNT = 3;
