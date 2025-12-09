@@ -30,4 +30,18 @@ public class BitPacker {
             return true;
         }
     }
+
+    //These two below are really self-explanatory.
+    public void fillWithZeros(){
+        appendBits((byte) 0b0, packSize - bitCount);
+    }
+
+    public void fillWithOnes(){
+        byte ones = 0b0;
+        for (int count = 0; count < packSize - bitCount; count++) {
+            ones <<= 1;
+            ones += 1;
+        }
+        appendBits(ones, packSize - bitCount);
+    }
 }

@@ -4,6 +4,7 @@ import Resources.Register;
 import Resources.Instruction;
 
 import java.io.*;
+import java.util.HashMap;
 
 public class Assembler {
 
@@ -14,6 +15,10 @@ public class Assembler {
 
     public static final int IMMEDIATE_MAX_BIT_COUNT = 3;
     public static final int EXTENDED_IMM_MAX_BIT_COUNT = 6;
+    public static final int OFFSET_MAX_BIT_COUNT = 8;
+    public static final int PIPELINE_OFFSET_IN_HALFWORDS = 2;
+
+    public static HashMap<String, Integer> labels = new HashMap<String, Integer>();
 
     public static void main(String[] args){
         if (args.length != 2) {
@@ -27,12 +32,18 @@ public class Assembler {
         BitPacker packer = new BitPacker();
         ImmediateHandler immediateHandler = new ImmediateHandler();
 
+        if (!inputFilePath.endsWith(SCRIPT_EXTENSION)){
+            System.err.println("Error: Invalid file extension, file name must end with " + SCRIPT_EXTENSION);
+            return;
+        }
+
+        if (!searchLabels(inputFilePath, labels)){
+            //The error message is logged within the function.
+            return;
+        }
+
         try (BufferedReader fileReader = new BufferedReader(new FileReader(inputFilePath));
             DataOutputStream fileWriter = new DataOutputStream(new FileOutputStream(outputFilePath))){
-            if (!inputFilePath.endsWith(SCRIPT_EXTENSION)){
-                System.err.println("Error: Invalid file extension, file name must end with " + SCRIPT_EXTENSION);
-                return;
-            }
 
             //Read each line
             int lineNo = 1;
@@ -44,13 +55,12 @@ public class Assembler {
                 line = line.trim();
                 String[] tokens = line.split(" +");
                 boolean flagsSet = tokens[0].toUpperCase().endsWith("S");
-                //Check if label
+                //Check if nothing illegal comes after label
                 if (tokens[0].endsWith(":")){
                     if (tokens.length > 1 && !tokens[1].startsWith(COMMENT_DELIMITER)){
                         System.err.printf("Syntax Error: Garbage following label at line %d\n", lineNo);
                         return;
                     }
-                    System.out.println("I am a label");
                 } //Check if instruction while removing the last S character if it exists
                 else if (Instruction.isInstruction((flagsSet) ? tokens[0].substring(0, tokens[0].length() - 1) : tokens[0])) {
                     Instruction currentInstruction = Instruction.valueOf(
@@ -87,6 +97,29 @@ public class Assembler {
 
                     switch (operandCount){
                         case 1: //Branch instruction
+                            packer.fillWithZeros();
+                            fileWriter.writeByte(packer.packedBits);
+
+                            String labelName = tokens[operandCount];
+
+                            if (!labels.containsKey(labelName)){
+                                System.err.printf("Syntax Error: No such label defined as %s at line %d\n",
+                                                                                            labelName, lineNo);
+                                return;
+                            }
+
+                            int offset = (labels.get(labelName) - instructionNo) - PIPELINE_OFFSET_IN_HALFWORDS;
+
+                            if (offset >= Math.pow(2, OFFSET_MAX_BIT_COUNT-1)
+                                    || offset < (-1) * Math.pow(2, OFFSET_MAX_BIT_COUNT)){
+                                System.err.printf("Error: Branch offset at line %d is too big\n", lineNo);
+                                return;
+                            }
+
+                            byte offsetInBytes = (byte) immediateHandler.shortenNegative(offset, OFFSET_MAX_BIT_COUNT);
+                            packer.appendBits(offsetInBytes, OFFSET_MAX_BIT_COUNT);
+                            fileWriter.writeByte(packer.packedBits);
+
                             break;
                         case 2: //Memory or Comparison
                             if (currentInstruction.getOpType() == (byte) 0b10){ //Memory
@@ -143,6 +176,8 @@ public class Assembler {
                                             Register.REGISTER_SIZE), Register.REGISTER_SIZE)){
                                         fileWriter.writeByte(packer.packedBits);
                                     }
+
+                                    instructionNo++; //Incrementing this again as we took up another instruction-sized space.
                                 }
                                 else{
                                     boolean isAddress = tokens[operandCount].startsWith(ADDRESS_DELIMITER);
@@ -160,10 +195,9 @@ public class Assembler {
                                         fileWriter.writeByte(packer.packedBits);
                                     }
 
-                                    if(packer.appendBits((byte) ((isAddress) ? 0b111 : 0b000),
-                                                packer.packSize - packer.bitCount)){
-                                        fileWriter.writeByte(packer.packedBits);
-                                    }
+                                    if (isAddress) packer.fillWithOnes();
+                                    else packer.fillWithZeros();
+                                    fileWriter.writeByte(packer.packedBits);
                                 }
                             }
                             else{
@@ -209,9 +243,10 @@ public class Assembler {
                                     }
                                 }
                                 else{
-                                    if(packer.appendBits((byte) 0b0, packer.packSize - packer.bitCount)){
-                                        fileWriter.writeByte(packer.packedBits);
-                                    }
+
+                                    packer.fillWithZeros();
+                                    fileWriter.writeByte(packer.packedBits);
+
                                 }
                             }
 
@@ -285,6 +320,61 @@ public class Assembler {
 
     }
 
+    //Finds all labels in the file, if it occurs twice yields an error (returns false to end the program)
+    //Puts all those labels names and the index of the instruction after it (to calculate offset later on)
+    //to a dictionary (I guess HashMap was more convenient in this case, but I used it as a dictionary).
+    public static boolean searchLabels(String inputFilePath, HashMap<String, Integer> labelDict){
+        try (BufferedReader fileReader = new BufferedReader(new FileReader(inputFilePath))){
+            int lineNo = 1;
+            int instructionNo = 0;
+            String line;
+            //Go through each line.
+            //This assumes any line which does not start with a comment or is not a label as an instruction.
+            //Because if it is not a valid instruction we will throw an error on the second pass.
+            while ((line = fileReader.readLine()) != null){
+                if (line.isEmpty() || line.startsWith(COMMENT_DELIMITER)) { lineNo++; continue; }
+                line = line.trim();
+                String[] tokens = line.split(" +");
 
+                Instruction doubleSizedInstruction = Instruction.FRM;
+                if (tokens[0].equals(":")){
+                    System.err.printf("Label Error: Label name cannot be empty at line %d\n", lineNo);
+                    return false;
+                }
 
+                if (tokens[0].endsWith(":")){
+                    String labelName = tokens[0].substring(0, tokens[0].length() - 1);
+                    if (labelDict.containsKey(labelName)){
+                        System.err.printf("Label Error: Same file cannot have two identical labels \"%s\" at line %d\n",
+                                                                                                        labelName, lineNo);
+                        return false;
+                    }
+                    labelDict.put(labelName, instructionNo + 1);
+                }
+                else{
+                    //This clause increments once more for FRM instruction
+                    if (!(tokens.length <= doubleSizedInstruction.getOpCount())){
+                        String instructionName = ((tokens[0].toUpperCase().endsWith("S"))
+                                ? tokens[0].substring(0, tokens[0].length() - 1) : tokens[0]);
+                        boolean containsImmediate = tokens[doubleSizedInstruction.getOpCount()].startsWith(IMMEDIATE_DELIMITER);
+
+                        if (instructionName.toUpperCase().equals(doubleSizedInstruction.name()) && containsImmediate){
+                            instructionNo++;
+                        }
+                    }
+                    instructionNo++;
+                }
+                lineNo++;
+            }
+            return true;
+        }
+        catch (FileNotFoundException error){
+            System.err.printf("Error: File %s not found.\n", inputFilePath);
+            return false;
+        }
+        catch (IOException error){
+            System.err.println("Error: An error occurred while reading file: " + error.getMessage());
+            return false;
+        }
+    }
 }
