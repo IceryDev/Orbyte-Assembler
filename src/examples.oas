@@ -1,0 +1,16 @@
+
+Start:
+    MOV  R0 #1     //Move immediate 1 to register R0
+    FRM  R1 #0x20  //Write immediate #0x20 to register R1
+
+    FRM  R2 &R1    //Write value at the address R1 at memory to R2
+
+    DIFS R0 R0 R2  //Subtract R2 from R0, store it at R0 and set condition code flags
+    BEQ  End       //Branch to label End if equal (Condition code flag Zero is set)
+
+LabelEg:           //Example label declaration
+    MOV  R3 #6     //Move value 6 to register R3
+
+End:               //End routine, will be automated on following updates
+    AND  R0 R0 R0  //This part does nothing and stays in an infinite loop
+    B    End       //
