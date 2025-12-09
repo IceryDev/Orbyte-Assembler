@@ -10,13 +10,13 @@ See the example.oas file for reference syntax and Instruction.java file to see e
 - Labels and PC offset calculation for branching
 
 ### General Instruction Structure
-- 3-operand instruction general format: <op> <Rd> <Rn> <Rm>/#<imm3>
-- 2-operand instruction general format: <op> <Rd> <Rn>/#<imm6>
-- Memory instruction general format (WRM/FRM): <op> <Rd> <Rn>/&<Ra>/#<imm8>
-- Label format: <name>:
-- Branch instruction format: B<cond> <Label>
+- 3-operand instruction general format: <\op> <\Rd> <\Rn> <\Rm>/#<\imm3>
+- 2-operand instruction general format: <\op> <\Rd> <\Rn>/#<\imm6>
+- Memory instruction general format (WRM/FRM): <\op> <\Rd> <\Rn>/&<\Ra>/#<\imm8>
+- Label format: <\name>:
+- Branch instruction format: B<\cond> <\Label>
 
-Where <op>, <Rd>, <Rn>, <Rm>, <Ra>, <imm3/6/8>, and <cond> signifies the instruction name, destination register, register operand 1, 
+Where <\op>, <\Rd>, <\Rn>, <\Rm>, <\Ra>, <\imm3/6/8>, and <\cond> are placeholders for the instruction name, destination register, register operand 1, 
 register operand 2, register operand containing address, immediate value with size 3/6/8 bits, and the condition for branching.
 
 ### Delimiters
