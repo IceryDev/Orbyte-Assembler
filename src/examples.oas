@@ -11,6 +11,6 @@ Start:
 LabelEg:           //Example label declaration
     MOV  R3 #6     //Move value 6 to register R3
 
-End:               //End routine, will be automated on following updates
+End:               //End routine, does not have to be written, it is automated
     AND  R0 R0 R0  //This part does nothing and stays in an infinite loop
     B    End       //

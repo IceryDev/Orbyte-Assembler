@@ -1,12 +1,7 @@
 
-Start:
-    LSL R0 R0 #4
-    CMP R0 #3
-    MOVS R0 #63
-Temp:
-    FRM R0 &R2
-    LCP R5 R3
+    SUM     R0 R1 #3
+    DIF     R2 R1 R3
 
-End:
-    AND R0 R0 R0
-    B   Temp
+Shifts:
+    LSL     R1 R1 #2
+    ROT     R2 R2 #1

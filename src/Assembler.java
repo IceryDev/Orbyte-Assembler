@@ -18,6 +18,8 @@ public class Assembler {
     public static final int OFFSET_MAX_BIT_COUNT = 8;
     public static final int PIPELINE_OFFSET_IN_HALFWORDS = 2;
 
+    public static final byte[] END_BYTES = {(byte) 0x20, (byte) 0x00, (byte) 0xC0, (byte) 0xFD}; // Opcodes for an infinite loop
+
     public static HashMap<String, Integer> labels = new HashMap<String, Integer>();
 
     public static void main(String[] args){
@@ -49,11 +51,14 @@ public class Assembler {
             int lineNo = 1;
             int instructionNo = 0;
             String line;
-            while ((line = fileReader.readLine()) != null){
-
-                if (line.isEmpty() || line.startsWith(COMMENT_DELIMITER)) { lineNo++; continue; }
+            while ((line = fileReader.readLine()) != null) {
                 line = line.trim();
                 String[] tokens = line.split(" +");
+                if (line.isEmpty() || line.startsWith(COMMENT_DELIMITER)) {
+                    lineNo++;
+                    continue;
+                }
+
                 boolean flagsSet = tokens[0].toUpperCase().endsWith("S");
                 //Check if nothing illegal comes after label
                 if (tokens[0].endsWith(":")){
@@ -64,7 +69,7 @@ public class Assembler {
                 } //Check if instruction while removing the last S character if it exists
                 else if (Instruction.isInstruction((flagsSet) ? tokens[0].substring(0, tokens[0].length() - 1) : tokens[0])) {
                     Instruction currentInstruction = Instruction.valueOf(
-                                    ((flagsSet) ? tokens[0].substring(0, tokens[0].length() - 1) : tokens[0]).toUpperCase());
+                            ((flagsSet) ? tokens[0].substring(0, tokens[0].length() - 1) : tokens[0]).toUpperCase());
 
                     if (!currentInstruction.getHasFlagBit() && flagsSet) {
                         System.err.printf("Syntax Error: Operation %s cannot have a flag setter bit \"S\"\n",
@@ -307,6 +312,13 @@ public class Assembler {
                 lineNo++;
             }
 
+            //This part adds the infinite loop made of
+            //End:
+            //      AND R0 R0 R0
+            //      B   End
+            for (byte byteToWrite : END_BYTES) {
+                fileWriter.writeByte(byteToWrite);
+            }
         }
         catch (FileNotFoundException error){
             System.err.printf("Error: File %s not found.\n", inputFilePath);
@@ -332,9 +344,9 @@ public class Assembler {
             //This assumes any line which does not start with a comment or is not a label as an instruction.
             //Because if it is not a valid instruction we will throw an error on the second pass.
             while ((line = fileReader.readLine()) != null){
-                if (line.isEmpty() || line.startsWith(COMMENT_DELIMITER)) { lineNo++; continue; }
                 line = line.trim();
                 String[] tokens = line.split(" +");
+                if (line.isEmpty() || line.startsWith(COMMENT_DELIMITER)) { lineNo++; continue; }
 
                 Instruction doubleSizedInstruction = Instruction.FRM;
                 if (tokens[0].equals(":")){
