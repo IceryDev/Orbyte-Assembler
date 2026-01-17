@@ -1,22 +1,22 @@
 package Resources;
 
 public enum Instruction {
-    MOV((byte)0b00, (byte)0b000, 2, true, true),
     SUM((byte)0b00, (byte)0b001, 3, true, true), //Same as ADD in ARM
     DIF((byte)0b00, (byte)0b010, 3, true, true), //DIFference, ARM equivalent - SUB
     DFR((byte)0b00, (byte)0b011, 3, true, true), //DiFference Reverse, ARM equivalent - RSB
     AND((byte)0b00, (byte)0b100, 3, true, true),
     LOR((byte)0b00, (byte)0b101, 3, true, true), //Logical OR, ARM equivalent - ORR
     XOR((byte)0b00, (byte)0b110, 3, true, true), //ARM equivalent - EOR
-    NOT((byte)0b00, (byte)0b111, 3, true, true),
 
-    CMP((byte)0b01, (byte)0b000, 2, false, true),
-    LCP((byte)0b01, (byte)0b001, 2, false, true), //Logical ComPare, ARM equivalent - TST
-    LSL((byte)0b01, (byte)0b010, 3, true, true),
-    LSR((byte)0b01, (byte)0b011, 3, true, true),
-    ASR((byte)0b01, (byte)0b100, 3, true, true),
-    ROT((byte)0b01, (byte)0b101, 3, true, true), //ARM equivalent - ROR
+    LSL((byte)0b01, (byte)0b000, 3, true, true),
+    LSR((byte)0b01, (byte)0b001, 3, true, true),
+    ASR((byte)0b01, (byte)0b010, 3, true, true),
+    ROT((byte)0b01, (byte)0b011, 3, true, true), //ARM equivalent - ROR
+    MOV((byte)0b01, (byte)0b100, 2, true, true),
+    NOT((byte)0b01, (byte)0b101, 2, true, true), //ARM equivalent - MVN
 
+    CMP((byte)0b10, (byte)0b000, 2, false, true),
+    LCP((byte)0b10, (byte)0b001, 2, false, true), //Logical ComPare, ARM equivalent - TST
     WRM((byte)0b10, (byte)0b110, 2, true, false), //WRite to Memory, ARM equivalent - STR
     FRM((byte)0b10, (byte)0b111, 2, true, true), //FRom Memory, ARM equivalent - LDR
 
@@ -24,10 +24,10 @@ public enum Instruction {
     BCS((byte)0b11, (byte)0b001, 1, false, false),
     BEQ((byte)0b11, (byte)0b010, 1, false, false),
     BNE((byte)0b11, (byte)0b011, 1, false, false),
-    BHU((byte)0b11, (byte)0b100, 1, false, false),
-    BHS((byte)0b11, (byte)0b101, 1, false, false),
-    BLU((byte)0b11, (byte)0b110, 1, false, false),
-    BLS((byte)0b11, (byte)0b111, 1, false, false);
+    BHU((byte)0b11, (byte)0b100, 1, false, false), //Branch Higher Unsigned, ARM equivalent - BHI
+    BHS((byte)0b11, (byte)0b101, 1, false, false), //Branch Higher Signed, ARM equivalent - BGT
+    BLU((byte)0b11, (byte)0b110, 1, false, false), //Branch Lower Unsigned, ARM equivalent - BLO
+    BLS((byte)0b11, (byte)0b111, 1, false, false); //Branch Lower Signed, ARM equivalent - BLT
 
 
     public static final int OPTYPE_BIT_COUNT = 2;
