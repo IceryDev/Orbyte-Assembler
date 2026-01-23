@@ -16,7 +16,7 @@ public class Assembler {
     public static final int IMMEDIATE_MAX_BIT_COUNT = 3;
     public static final int EXTENDED_IMM_MAX_BIT_COUNT = 6;
     public static final int OFFSET_MAX_BIT_COUNT = 8;
-    public static final int PIPELINE_OFFSET_IN_HALFWORDS = 2;
+    public static final int PIPELINE_OFFSET_IN_HALFWORDS = 2; //This considers a 3 stage pipeline
 
     public static final byte[] END_BYTES = {(byte) 0x20, (byte) 0x00, (byte) 0xC0, (byte) 0xFD}; // Opcodes for an infinite loop
 
@@ -127,10 +127,12 @@ public class Assembler {
 
                             break;
                         case 2: //Memory or Comparison
-                            if (currentInstruction.getOpType() == (byte) 0b10){ //Memory
+                            if (currentInstruction.getOpType() == (byte) 0b10 &&
+                                    currentInstruction.getOpcode() > (byte) 0b100){ //Memory
 
                                 int immediateValue = 0;
                                 try{
+                                    //This part uses the flag bit as a negative flag
                                     if (containsImmediate) {
                                         immediateValue = immediateHandler.parseImmediateToInt(tokens[operandCount]);
                                         packer.appendBits((byte) ((immediateValue < 0) ? 0b1 : 0b0), Instruction.FLAG_BIT_COUNT);

@@ -1,7 +1,6 @@
 
-    SUM     R0 R1 #3
-    DIF     R2 R1 R3
+TempLabel:
+    MOV     R0 #0
+    FRM     R1 #0x20
 
-Shifts:
-    LSL     R1 R1 #2
-    ROT     R2 R2 #1
+    

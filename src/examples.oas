@@ -1,7 +1,7 @@
 
 Start:
     MOV  R0 #1     //Move immediate 1 to register R0
-    FRM  R1 #0x20  //Write immediate #0x20 to register R1
+    FRM  R1 #-12  //Write immediate #0x20 to register R1
 
     FRM  R2 &R1    //Write value at the address R1 at memory to R2
 
